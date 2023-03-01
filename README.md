@@ -11,6 +11,21 @@ You can get your invite [here](http://slack.k8s.io/)
 - Supports most popular **Linux distributions**
 - **Continuous integration tests**
 
+
+## Problems with Ubuntu 22.04 raspberry pi 4
+
+- `modprobe dummy` is failing:
+
+    Run the following commands to fix it
+
+    ```bash
+      sudo apt install linux-generic -y;
+      sudo apt install --reinstall linux-image-$(uname -r) -y;
+      sudo apt install --reinstall linux-modules-$(uname -r) -y;
+      sudo apt install --reinstall linux-modules-extra-$(uname -r) -y;
+      reboot
+    ```
+
 ## Quick Start
 
 Below are several ways to use Kubespray to deploy a Kubernetes cluster.
