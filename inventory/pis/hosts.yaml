@@ -70,8 +70,6 @@ all:
           - "node-role.kubernetes.io/control-plane=:NoSchedule"
     kube_node:
       hosts:
-        opi-black:
-        opi-grey:
         opi-white:
         # rpi3b:
         rpi-red:
