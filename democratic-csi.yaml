@@ -1,6 +1,6 @@
 - name: install democratic dependencies
-  # hosts: all
-  hosts: rpi-green
+  hosts: all
+  # hosts: rpi-green
   gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   vars:

@@ -1,0 +1,28 @@
+- name: fix systemd-resolved crashing nodelocaldns 
+  hosts: all
+  gather_facts: False
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - copy:
+        content: |
+          [Resolve]
+          DNS=169.254.25.10 8.8.8.8 8.8.4.4 192.168.1.1
+          FallbackDNS=
+          Domains=lan
+          #LLMNR=no
+          #MulticastDNS=no
+          DNSSEC=no
+          Cache=no-negative
+          #DNSStubListener=yes
+        dest: "/etc/systemd/resolved.conf"
+
+    - name: Enable systemd-resolved.service
+      ansible.builtin.systemd:
+        enabled: true
+        daemon_reload: true
+        name: systemd-resolved.service
+
+    - name: Restart systemd-resolved.service
+      ansible.builtin.systemd:
+        state: restarted
+        name: systemd-resolved.service
