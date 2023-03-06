@@ -11,6 +11,13 @@ You can get your invite [here](http://slack.k8s.io/)
 - Supports most popular **Linux distributions**
 - **Continuous integration tests**
 
+## Problems with Ubuntu 22.03 Oracle Cloud
+
+- some firewall rules in place:
+
+```bash
+sudo systemctl stop netfilter-persistent; sudo systemctl disable netfilter-persistent; sudo iptables -F; sudo iptables -t nat -F
+```
 
 ## Problems with Ubuntu 22.04 raspberry pi 4
 
