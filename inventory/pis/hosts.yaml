@@ -1,91 +1,69 @@
 all:
   hosts:
-    opi-black:
-      ansible_host: 192.168.1.110
-      ip: 192.168.1.110
-      access_ip: 192.168.1.110
-    opi-grey:
-      ansible_host: 192.168.1.109
-      ip: 192.168.1.109
-      access_ip: 192.168.1.109
-    opi-white:
-      ansible_host: 192.168.1.108
-      ip: 192.168.1.108
-      access_ip: 192.168.1.108
-    # rpi3b:
-    #   ansible_host: 192.168.1.100
-    #   ip: 192.168.1.100
-    #   access_ip: 192.168.1.100
-    rpi-red:
+    opi-red:
+      ansible_host: 192.168.1.100
+      ip: 192.168.1.100
+      access_ip: 192.168.1.100
+    opi-orange:
       ansible_host: 192.168.1.101
       ip: 192.168.1.101
       access_ip: 192.168.1.101
-    rpi-orange:
+    opi-yellow:
       ansible_host: 192.168.1.102
       ip: 192.168.1.102
       access_ip: 192.168.1.102
-    rpi-yellow:
+    opi-green:
       ansible_host: 192.168.1.103
       ip: 192.168.1.103
       access_ip: 192.168.1.103
-    rpi-green:
+    opi-blue:
       ansible_host: 192.168.1.104
       ip: 192.168.1.104
       access_ip: 192.168.1.104
-    rpi-blue:
+    opi-purple:
       ansible_host: 192.168.1.105
       ip: 192.168.1.105
       access_ip: 192.168.1.105
-    rpi-purple:
+    opi-white:
       ansible_host: 192.168.1.106
       ip: 192.168.1.106
       access_ip: 192.168.1.106
   children:
-    raspberrypis:
-      hosts:
-        rpi-red:
-        rpi-orange:
-        rpi-yellow:
-        rpi-green:
-        rpi-blue:
-        rpi-purple:
-      vars:
-        node_labels:
-          hw: raspberry
     orangepis:
       hosts:
-        opi-black:
-        opi-grey:
+        opi-red:
+        opi-orange:
+        opi-yellow:
+        opi-green:
+        opi-blue:
+        opi-purple:
         opi-white:
       vars:
         node_labels:
-          hw: orange
-
+          hw: orangepi
     kube_control_plane:
       hosts:
-        opi-black:
-        opi-grey:
-      vars:
-        node_taints:
-          - "node-role.kubernetes.io/control-plane=:NoSchedule"
+        opi-red:
+        opi-orange:
     kube_node:
       hosts:
+        opi-yellow:
+        opi-green:
+        opi-blue:
+        opi-purple:
         opi-white:
-        # rpi3b:
-        rpi-red:
-        rpi-orange:
-        rpi-yellow:
-        rpi-green:
-        rpi-blue:
-        rpi-purple:
     etcd:
       hosts:
-        opi-black:
-        opi-grey:
-        opi-white:
+        opi-red:
+        opi-orange:
+        opi-yellow:
+      vars:
+        node_labels:
+          etcd_node: "true"
     k8s_cluster:
       children:
         kube_control_plane:
         kube_node:
     calico_rr:
       hosts: {}
+
