@@ -56,6 +56,13 @@ CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inv
 cat inventory/mycluster/group_vars/all/all.yml
 cat inventory/mycluster/group_vars/k8s_cluster/k8s-cluster.yml
 
+# Clean up old Kubernete cluster with Ansible Playbook - run the playbook as root
+# The option `--become` is required, as for example cleaning up SSL keys in /etc/,
+# uninstalling old packages and interacting with various systemd daemons.
+# Without --become the playbook will fail to run!
+# And be mind it will remove the current kubernetes cluster (if it's running)!
+ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root reset.yml
+
 # Deploy Kubespray with Ansible Playbook - run the playbook as root
 # The option `--become` is required, as for example writing SSL keys in /etc/,
 # installing packages and interacting with various systemd daemons.
@@ -98,6 +105,10 @@ docker run --rm -it --mount type=bind,source="$(pwd)"/inventory/sample,dst=/inve
 # Inside the container you may now run the kubespray playbooks:
 ansible-playbook -i /inventory/inventory.ini --private-key /root/.ssh/id_rsa cluster.yml
 ```
+
+#### Collection
+
+See [here](docs/ansible_collection.md) if you wish to use this repository as an Ansible collection
 
 ### Vagrant
 
@@ -172,30 +183,30 @@ Note: Upstart/SysV init based OS types are not supported.
 ## Supported Components
 
 - Core
-  - [kubernetes](https://github.com/kubernetes/kubernetes) v1.26.2
+  - [kubernetes](https://github.com/kubernetes/kubernetes) v1.26.3
   - [etcd](https://github.com/etcd-io/etcd) v3.5.6
   - [docker](https://www.docker.com/) v20.10 (see note)
   - [containerd](https://containerd.io/) v1.7.0
   - [cri-o](http://cri-o.io/) v1.24 (experimental: see [CRI-O Note](docs/cri-o.md). Only on fedora, ubuntu and centos based OS)
 - Network Plugin
   - [cni-plugins](https://github.com/containernetworking/plugins) v1.2.0
-  - [calico](https://github.com/projectcalico/calico) v3.25.0
+  - [calico](https://github.com/projectcalico/calico) v3.25.1
   - [canal](https://github.com/projectcalico/canal) (given calico/flannel versions)
-  - [cilium](https://github.com/cilium/cilium) v1.12.1
-  - [flannel](https://github.com/flannel-io/flannel) v0.20.2
+  - [cilium](https://github.com/cilium/cilium) v1.13.0
+  - [flannel](https://github.com/flannel-io/flannel) v0.21.4
   - [kube-ovn](https://github.com/alauda/kube-ovn) v1.10.7
   - [kube-router](https://github.com/cloudnativelabs/kube-router) v1.5.1
   - [multus](https://github.com/k8snetworkplumbingwg/multus-cni) v3.8
   - [weave](https://github.com/weaveworks/weave) v2.8.1
-  - [kube-vip](https://github.com/kube-vip/kube-vip) v0.5.11
+  - [kube-vip](https://github.com/kube-vip/kube-vip) v0.5.12
 - Application
-  - [cert-manager](https://github.com/jetstack/cert-manager) v1.11.0
+  - [cert-manager](https://github.com/jetstack/cert-manager) v1.11.1
   - [coredns](https://github.com/coredns/coredns) v1.9.3
-  - [ingress-nginx](https://github.com/kubernetes/ingress-nginx) v1.6.4
+  - [ingress-nginx](https://github.com/kubernetes/ingress-nginx) v1.7.0
   - [krew](https://github.com/kubernetes-sigs/krew) v0.4.3
-  - [argocd](https://argoproj.github.io/) v2.6.3
-  - [helm](https://helm.sh/) v3.11.1
-  - [metallb](https://metallb.universe.tf/)  v0.12.1
+  - [argocd](https://argoproj.github.io/) v2.6.7
+  - [helm](https://helm.sh/) v3.11.3
+  - [metallb](https://metallb.universe.tf/)  v0.13.9
   - [registry](https://github.com/distribution/distribution) v2.8.1
 - Storage Plugin
   - [cephfs-provisioner](https://github.com/kubernetes-incubator/external-storage) v2.1.0-k8s1.11
