@@ -388,6 +388,7 @@ kube_proxy_metrics_bind_address: 0.0.0.0:10249
 kube_kubeadm_apiserver_extra_args:
   feature-gates: "ValidatingAdmissionPolicy=true"
   runtime-config: "admissionregistration.k8s.io/v1alpha1=true"
+  service-account-issuer: "https://carnei-ro.github.io/k8s-aws-iam/rpi"
 
 kubelet_feature_gates:
   - ValidatingAdmissionPolicy=true
