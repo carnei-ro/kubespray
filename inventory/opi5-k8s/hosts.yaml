@@ -1,0 +1,68 @@
+all:
+  hosts:
+    opi-red:
+      ansible_host: 192.168.5.11
+      ip: 192.168.5.11
+      access_ip: 192.168.5.11
+    opi-orange:
+      ansible_host: 192.168.5.12
+      ip: 192.168.5.12
+      access_ip: 192.168.5.12
+    opi-yellow:
+      ansible_host: 192.168.5.13
+      ip: 192.168.5.13
+      access_ip: 192.168.5.13
+    opi-green:
+      ansible_host: 192.168.5.14
+      ip: 192.168.5.14
+      access_ip: 192.168.5.14
+    opi-blue:
+      ansible_host: 192.168.5.15
+      ip: 192.168.5.15
+      access_ip: 192.168.5.15
+    opi-purple:
+      ansible_host: 192.168.5.16
+      ip: 192.168.5.16
+      access_ip: 192.168.5.16
+    opi-white:
+      ansible_host: 192.168.5.17
+      ip: 192.168.5.17
+      access_ip: 192.168.5.17
+  children:
+    orangepis:
+      hosts:
+        opi-red:
+        opi-orange:
+        opi-yellow:
+        opi-green:
+        opi-blue:
+        opi-purple:
+        opi-white:
+      vars:
+        node_labels:
+          hw: orange-pi5
+    kube_control_plane:
+      hosts:
+        opi-red:
+        opi-orange:
+    kube_node:
+      hosts:
+        opi-yellow:
+        opi-green:
+        opi-blue:
+        opi-purple:
+        opi-white:
+    etcd:
+      hosts:
+        opi-red:
+        opi-orange:
+        opi-yellow:
+      vars:
+        node_labels:
+          etcd_node: "true"
+    k8s_cluster:
+      children:
+        kube_control_plane:
+        kube_node:
+    calico_rr:
+      hosts: {}

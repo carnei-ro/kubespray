@@ -1,0 +1,48 @@
+- name: install democratic dependencies
+  hosts: all
+  # hosts: rpi-green
+  gather_facts: False
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  vars:
+    dependencies:
+      - libnfs-utils
+      - open-iscsi
+      - lsscsi
+      - sg3-utils
+      - multipath-tools
+      - scsitools
+  tasks:
+    - copy:
+        content: |
+          defaults {
+              user_friendly_names yes
+              find_multipaths yes
+          }
+        dest: "/etc/multipath.conf"
+
+    - name: install dependency "{{ item }}"
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items: '{{ dependencies }}'
+
+    - name: Enable multipath-tools.service
+      ansible.builtin.systemd:
+        enabled: true
+        daemon_reload: true
+        name: multipath-tools.service
+
+    - name: Restart multipath-tools.service
+      ansible.builtin.systemd:
+        state: restarted
+        name: multipath-tools.service
+
+    - name: Enabled open-iscsi.service
+      ansible.builtin.systemd:
+        enabled: true
+        name: open-iscsi.service
+
+    - name: Start open-iscsi.service
+      ansible.builtin.systemd:
+        state: started
+        name: open-iscsi.service
