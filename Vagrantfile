@@ -4,6 +4,8 @@
 # For help on using kubespray with vagrant, check out docs/developers/vagrant.md
 
 require 'fileutils'
+require 'ipaddr'
+require 'socket'
 
 Vagrant.require_version ">= 2.0.0"
 
@@ -33,7 +35,7 @@ SUPPORTED_OS = {
   "fedora40"            => {box: "fedora/40-cloud-base",       user: "vagrant"},
   "fedora39-arm64"      => {box: "bento/fedora-39-arm64",      user: "vagrant"},
   "fedora40-arm64"      => {box: "bento/fedora-40",            user: "vagrant"},
-  "opensuse"            => {box: "opensuse/Leap-15.4.x86_64",  user: "vagrant"},
+  "opensuse"            => {box: "opensuse/Leap-15.6.x86_64",  user: "vagrant"},
   "opensuse-tumbleweed" => {box: "opensuse/Tumbleweed.x86_64", user: "vagrant"},
   "oraclelinux"         => {box: "generic/oracle7",            user: "vagrant"},
   "oraclelinux8"        => {box: "generic/oracle8",            user: "vagrant"},
@@ -63,12 +65,22 @@ $inventories ||= []
 $multi_networking ||= "False"
 $download_run_once ||= "True"
 $download_force_cache ||= "False"
+# Modify those to have separate groups (for instance, to test separate etcd:)
+# first_control_plane = 1
+# first_etcd = 4
+# control_plane_instances = 3
+# etcd_instances = 3
+$first_node ||= 1
+$first_control_plane ||= 1
+$first_etcd ||= 1
+
 # The first three nodes are etcd servers
 $etcd_instances ||= [$num_instances, 3].min
 # The first two nodes are kube masters
-$kube_master_instances ||= [$num_instances, 2].min
+$control_plane_instances ||= [$num_instances, 2].min
 # All nodes are kube nodes
-$kube_node_instances ||= $num_instances
+$kube_node_instances ||= $num_instances - $first_node + 1
+
 # The following only works when using the libvirt provider
 $kube_node_instances_with_disks ||= false
 $kube_node_instances_with_disks_size ||= "20G"
@@ -88,6 +100,33 @@ $playbook ||= "cluster.yml"
 $extra_vars ||= {}
 
 host_vars = {}
+
+def collect_networks(subnet, subnet_ipv6)
+  Socket.getifaddrs.filter_map do |iface|
+    next unless iface&.netmask&.ip_address && iface.addr
+
+    is_ipv6 = iface.addr.ipv6?
+    ip      = IPAddr.new(iface.addr.ip_address.split('%').first)
+    ip_test = is_ipv6 ? IPAddr.new("#{subnet_ipv6}::0") : IPAddr.new("#{subnet}.0")
+
+    prefix  = IPAddr.new(iface.netmask.ip_address).to_i.to_s(2).count('1')
+    network = ip.mask(prefix)
+
+    [IPAddr.new("#{network}/#{prefix}"), ip_test]
+  end
+end
+
+def subnet_in_use?(network_ips)
+  network_ips.any? { |net, test_ip| net.include?(test_ip) && test_ip != net }
+end
+
+network_ips = collect_networks($subnet, $subnet_ipv6)
+
+if subnet_in_use?(network_ips)
+  puts "Invalid subnet provided, subnet is already in use: #{$subnet}.0"
+  puts "Subnets in use: #{network_ips.inspect}"
+  exit 1
+end
 
 # throw error if os is not supported
 if ! SUPPORTED_OS.key?($os)
@@ -297,9 +336,9 @@ Vagrant.configure("2") do |config|
             ansible.tags = [$ansible_tags]
           end
           ansible.groups = {
-            "etcd" => ["#{$instance_name_prefix}-[1:#{$etcd_instances}]"],
-            "kube_control_plane" => ["#{$instance_name_prefix}-[1:#{$kube_master_instances}]"],
-            "kube_node" => ["#{$instance_name_prefix}-[1:#{$kube_node_instances}]"],
+            "etcd" => ["#{$instance_name_prefix}-[#{$first_etcd}:#{$etcd_instances + $first_etcd - 1}]"],
+            "kube_control_plane" => ["#{$instance_name_prefix}-[#{$first_control_plane}:#{$control_plane_instances + $first_control_plane - 1}]"],
+            "kube_node" => ["#{$instance_name_prefix}-[#{$first_node}:#{$kube_node_instances + $first_node - 1}]"],
             "k8s_cluster:children" => ["kube_control_plane", "kube_node"],
           }
         end

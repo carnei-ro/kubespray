@@ -31,6 +31,9 @@ kube_etcd_key_file: node-{{ inventory_hostname }}-key.pem
 # CLI/web clients.
 kube_controller_manager_bind_address: "::"
 
+## Control plane health check settings
+control_plane_health_retries: 60  # Default retries for apiserver, scheduler, controller-manager health checks
+
 # Leader election lease durations and timeouts for controller-manager
 kube_controller_manager_leader_elect_lease_duration: 15s
 kube_controller_manager_leader_elect_renew_deadline: 10s
@@ -110,11 +113,11 @@ kube_apiserver_admission_event_rate_limits: {}
 ## PodSecurityAdmission plugin configuration
 kube_pod_security_use_default: false
 kube_pod_security_default_enforce: baseline
-kube_pod_security_default_enforce_version: "{{ kube_major_version }}"
+kube_pod_security_default_enforce_version: "v{{ kube_major_version }}"
 kube_pod_security_default_audit: restricted
-kube_pod_security_default_audit_version: "{{ kube_major_version }}"
+kube_pod_security_default_audit_version: "v{{ kube_major_version }}"
 kube_pod_security_default_warn: restricted
-kube_pod_security_default_warn_version: "{{ kube_major_version }}"
+kube_pod_security_default_warn_version: "v{{ kube_major_version }}"
 kube_pod_security_exemptions_usernames: []
 kube_pod_security_exemptions_runtime_class_names: []
 kube_pod_security_exemptions_namespaces:
@@ -237,6 +240,10 @@ auto_renew_certificates_systemd_calendar: "Mon *-*-1,2,3,4,5,6,7 03:00:00"
 # we can opt out from the default behavior by setting kubeadm_upgrade_auto_cert_renewal to false
 kubeadm_upgrade_auto_cert_renewal: true
 
+# Add Subject Alternative Names to the Kubernetes apiserver certificates.
+# Useful if you access the API from multiples load balancers, for instance.
+supplementary_addresses_in_ssl_keys: []
+
 # Bash alias of kubectl to interact with Kubernetes cluster much easier
 # kubectl_alias: k
 
@@ -248,7 +255,16 @@ kube_apiserver_tracing_sampling_rate_per_million: 100
 # Enable kubeadm file discovery if anonymous access has been removed
 kubeadm_use_file_discovery: "{{ remove_anonymous_access }}"
 
+# imagePullSerial specifies if image pulling performed by kubeadm must be done serially or in parallel. Default: true
+kubeadm_image_pull_serial: true
+
 # Supported asymmetric encryption algorithm types for the cluster's keys and certificates.
 # can be one of RSA-2048(default), RSA-3072, RSA-4096, ECDSA-P256
 # ref: https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta4/#kubeadm-k8s-io-v1beta4-ClusterConfiguration
 kube_asymmetric_encryption_algorithm: "RSA-2048"
+
+# certificates validity period configuration
+# non-CA certificate validity period, default 1 year (365d × 24h = 8760h)
+kube_cert_validity_period: 8760h
+# CA certificate validity period, default 10 years (365d × 24h × 10 = 87600h)
+kube_ca_cert_validity_period: 87600h

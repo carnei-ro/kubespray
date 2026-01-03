@@ -25,7 +25,7 @@ Some variables of note include:
 * *calico_vxlan_mode* - Configures Calico vxlan encapsulation - valid values are 'Never', 'Always' and 'CrossSubnet' (default 'Always')
 * *calico_network_backend* - Configures Calico network backend - valid values are 'none', 'bird' and 'vxlan' (default 'vxlan')
 * *kube_network_plugin* - Sets k8s network plugin (default Calico)
-* *kube_proxy_mode* - Changes k8s proxy mode to iptables mode
+* *kube_proxy_mode* - Changes k8s proxy mode to iptables, ipvs, nftables mode
 * *kube_version* - Specify a given Kubernetes version
 * *searchdomains* - Array of DNS domains to search when looking up hostnames
 * *remove_default_searchdomains* - Boolean that removes the default searchdomain
@@ -103,13 +103,13 @@ following default cluster parameters:
 
 * *kube_service_addresses_ipv6* - Subnet for cluster IPv6 IPs (default is ``fd85:ee78:d8a6:8607::1000/116``). Must not overlap with ``kube_pods_subnet_ipv6``.
 
-* *kube_service_subnets* - All service subnets separated by commas (default is a mix of ``kube_service_addresses`` and ``kube_service_addresses_ipv6`` depending on ``ipv4_stack`` and ``ipv6_stacke`` options),
+* *kube_service_subnets* - All service subnets separated by commas (default is a mix of ``kube_service_addresses`` and ``kube_service_addresses_ipv6`` depending on ``ipv4_stack`` and ``ipv6_stack`` options),
   for example ``10.233.0.0/18,fd85:ee78:d8a6:8607::1000/116`` for dual stack(ipv4_stack/ipv6_stack set to `true`).
   It is not recommended to change this variable directly.
 
 * *kube_pods_subnet_ipv6* - Subnet for Pod IPv6 IPs (default is ``fd85:ee78:d8a6:8607::1:0000/112``). Must not overlap with ``kube_service_addresses_ipv6``.
 
-* *kube_pods_subnets* - All pods subnets separated by commas (default is a mix of ``kube_pods_subnet`` and ``kube_pod_subnet_ipv6`` depending on ``ipv4_stack`` and ``ipv6_stacke`` options),
+* *kube_pods_subnets* - All pods subnets separated by commas (default is a mix of ``kube_pods_subnet`` and ``kube_pod_subnet_ipv6`` depending on ``ipv4_stack`` and ``ipv6_stack`` options),
   for example ``10.233.64.0/18,fd85:ee78:d8a6:8607::1:0000/112`` for dual stack(ipv4_stack/ipv6_stack set to `true`).
   It is not recommended to change this variable directly.
 
@@ -180,7 +180,7 @@ and ``kube_pods_subnet``, for example from the ``172.18.0.0/16``.
 
 IPv4 stack enable by *ipv4_stack* is set to ``true``, by default.
 IPv6 stack enable by *ipv6_stack* is set to ``false`` by default.
-This will use the default IPv4 and IPv6 subnets specified in the defaults file in the ``kubespray-defaults`` role, unless overridden of course. The default config will give you room for up to 256 nodes with 126 pods per node, and up to 4096 services.
+This will use the default IPv4 and IPv6 subnets specified in the defaults file in the ``kubespray_defaults`` role, unless overridden of course. The default config will give you room for up to 256 nodes with 126 pods per node, and up to 4096 services.
 Set both variables to ``true`` for Dual Stack mode.
 IPv4 has higher priority in Dual Stack mode(e.g. in variables `main_ip`, `main_access_ip` and other).
 You can also make IPv6 only clusters with ``false`` in *ipv4_stack*.
